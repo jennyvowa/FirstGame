@@ -2,7 +2,7 @@
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 canvas.width = 1000;
-canvas.height = 600;
+canvas.height = 750;
 document.body.appendChild(canvas);
 
 // SoundFx
@@ -70,20 +70,28 @@ spacestationImage.src = "images/spacestation.png";
 var shipsprite = {
 	speed: 256, // movement in pixels per second
 	x: 0,
-	y: 0
+	y: 0,
+	width: 62,
+	height: 49
 };
 var spacestation = {
 	x: 0,
-	y: 0
+	y: 0,
+	width: 60,
+	height:75
 };
 
 var destroyer = {
 	x: 500,
 	y: 100,
+	width: 75,
+	height: 70,
 	direction: 1
 };
 
 var spacestationsCaught = 0;
+var boarderTopLength = 30;
+var boarderLeftLenth = 20;
 
 // Handle keyboard controls
 var keysDown = {}; // object were we add up to 4 properties when keys go down
@@ -101,68 +109,69 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a spacestation
 var reset = function () {
+	//Place the shipsprite in the middle of canvas
 	shipsprite.x = canvas.width / 2;
 	shipsprite.y = canvas.height / 2;
 
 	//Place the spacestation somewhere on the screen randomly
-	spacestation.x = 32 + (Math.random() * (canvas.width - 150));
-	spacestation.y = 32 + (Math.random() * (canvas.height - 148));
-	destroyer.x = 32 + (Math.random() * (canvas.width - 150));
-	destroyer.y = 32 + (Math.random() * (canvas.height - 148));
+	spacestation.x = boarderTopLength + (Math.random() * (canvas.width - 150));
+	spacestation.y = boarderTopLength + (Math.random() * (canvas.height - 148));
+	destroyer.x = boarderTopLength + (Math.random() * (canvas.width - 150));
+	destroyer.y = boarderTopLength + (Math.random() * (canvas.height - 148));
 	destroyer.direction = 1;
 };
 
 // Update game objects
 var update = function (modifier) {
 	if (38 in keysDown) { // Player holding up
-		shipsprite.y -= shipsprite.speed * modifier;
-		if (shipsprite.y < (32)) {
-			shipsprite.y = 32;
+		shipsprite.y -= shipsprite.speed * modifier; // make the object move fater or lower
+		if (shipsprite.y < (boarderTopLength)) {
+			shipsprite.y = boarderTopLength;
 		}
 
 	}
 	if (40 in keysDown) { // Player holding down
 		shipsprite.y += shipsprite.speed * modifier;
-		if (shipsprite.y > (1000 - (81))) {
-			shipsprite.y = 1000 - 81;
+		if (shipsprite.y > (canvas.height - (boarderTopLength + shipsprite.height ))) {
+			shipsprite.y = canvas.height - (boarderTopLength + shipsprite.height);
 		}
 	}
 	if (37 in keysDown) { // Player holding left
 		shipsprite.x -= shipsprite.speed * modifier;
-		if (shipsprite.x < (21)) {
-			shipsprite.x = 21;
+		if (shipsprite.x < (boarderLeftLenth)) {
+			shipsprite.x = boarderTopLength ;
 		}
 	}
 	if (39 in keysDown) { // Player holding right
 		shipsprite.x += shipsprite.speed * modifier;
-		if (shipsprite.x > (1000 - (32 + 55))) {
-			shipsprite.x = 1000 - (32 + 55);
+		if (shipsprite.x > (canvas.width - (boarderLeftLenth + shipsprite.width))) {
+			shipsprite.x = canvas.width - (boarderLeftLenth + shipsprite.width);
 		}
 	}
 
 	destroyer.x = destroyer.x + (4 * destroyer.direction);
-	if (destroyer.x > 900) {
+	if (destroyer.x >= canvas.width - boarderLeftLenth - destroyer.width) { // go right
 		destroyer.direction = -1;
 	}
-	if (destroyer.x < 50) {
+	if (destroyer.x <= boarderTopLength) {   // go left
 		destroyer.direction = 1;
 	}
 
 	destroyer.y = destroyer.y + (4 * destroyer.direction);
-	if (destroyer.y > 900) {
+	if (destroyer.y >= canvas.height - boarderTopLength - destroyer.height) {  // go top
 		destroyer.direction = -1.5;
 	}
-	if (destroyer.y < 50) {
-		destroyer.direction = 0.5;
+	if (destroyer.y <= boarderTopLength) {   // go bottom 
+		destroyer.direction = 0.8;
 	}
 
 	// Are they touching?
 
 	if (
-		shipsprite.x + 5 <= (spacestation.x + 81)
-		&& spacestation.x <= (shipsprite.x + 55)
-		&& shipsprite.y <= (spacestation.y + 83)
-		&& spacestation.y <= (shipsprite.y + 52)
+		shipsprite.x <= (spacestation.x + shipsprite.x) // touch from right of spacestation
+		&& spacestation.x <= (shipsprite.x + spacestation.height) // touch from the left
+		&& shipsprite.y <= (spacestation.y + shipsprite.width) // touch from the top
+		&& spacestation.y <= (shipsprite.y + spacestation.height)  // touch from the bottom 
 	) {
 
 		++spacestationsCaught;
@@ -202,20 +211,27 @@ var update = function (modifier) {
 
 // Draw everything
 var render = function () {
+	// Draw backgroud first, then draw other objects on the top of background 
 	if (bgReady) {
 		ctx.drawImage(bgImage, 0, 0);
 	}
 
 	if (btReady) {
 		ctx.drawImage(btImage, 0, 0);
-		ctx.drawImage(btImage, 0, 1000 - 32);
+		ctx.drawImage(btImage, 0, canvas.height - 32);
 	}
 
 	if (blReady) {
 		ctx.drawImage(blImage, 0, 0);
-		ctx.drawImage(blImage, 1000 - 32, 0);
+		ctx.drawImage(blImage, canvas.width - 32, 0);
 	}
 
+		// Score
+	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.font = "24px Helvetica";
+	ctx.textAlign = "left";
+	ctx.textBaseline = "top";
+	ctx.fillText("Destroyed: " + spacestationsCaught, 32, 32);
 
 	if (shipspriteReady) {
 		ctx.drawImage(shipspriteImage, shipsprite.x, shipsprite.y);
@@ -228,12 +244,7 @@ var render = function () {
 	if (destroyerReady) {
 		ctx.drawImage(destroyerImage, destroyer.x, destroyer.y);
 	}
-	// Score
-	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.font = "24px Helvetica";
-	ctx.textAlign = "left";
-	ctx.textBaseline = "top";
-	ctx.fillText("Space Stations Destroyed: " + spacestationsCaught, 32, 32);
+
 };
 
 /************************* The main game loop   **********************/
