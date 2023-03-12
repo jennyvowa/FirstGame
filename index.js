@@ -47,14 +47,14 @@ destroyerImage.onload = function () {
 destroyerImage.src = "images/destroyer.jpg";
 
 
-// shipsprite image 
-var shipspriteReady = false;
-var shipspriteImage = new Image();
-shipspriteImage.onload = function () {
-	shipspriteReady = true;
+// palyerChar image 
+var palyerCharReady = false;
+var palyerCharImage = new Image();
+palyerCharImage.onload = function () {
+	palyerCharReady = true;
 };
-//shipspriteImage.src = "images/shipsprite.png";
-shipspriteImage.src = "images/1shipsprite.png";
+//palyerCharImage.src = "images/palyerChar.png";
+palyerCharImage.src = "images/1shipsprite.png";
 
 // spacestation image
 var spacestationReady = false;
@@ -67,7 +67,7 @@ spacestationImage.src = "images/spacestation.png";
 
 /*****************************   Main Loop of the game     *************************/
 // Game objects
-var shipsprite = {
+var palyerChar = {
 	speed: 256, // movement in pixels per second
 	x: 0,
 	y: 0,
@@ -110,9 +110,9 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a spacestation
 var reset = function () {
-	//Place the shipsprite in the middle of canvas
-	shipsprite.x = canvas.width / 2;
-	shipsprite.y = canvas.height / 2;
+	//Place the palyerChar in the middle of canvas
+	palyerChar.x = canvas.width / 2;
+	palyerChar.y = canvas.height / 2;
 
 	//Place the spacestation somewhere on the screen randomly
 	spacestation.x = boarderTopLen + (Math.random() * (canvas.width - 150));
@@ -125,28 +125,28 @@ var reset = function () {
 // Update game objects
 var update = function (modifier) {
 	if (38 in keysDown) { // Player holding up 
-		shipsprite.y -= shipsprite.speed * modifier; // make the object move fater or lower
-		if (shipsprite.y < (boarderTopLen)) {
-			shipsprite.y = boarderTopLen;
+		palyerChar.y -= palyerChar.speed * modifier; // make the object move fater or lower
+		if (palyerChar.y < (boarderTopLen)) {
+			palyerChar.y = boarderTopLen;
 		}
 
 	}
 	if (40 in keysDown) { // Player holding down
-		shipsprite.y += shipsprite.speed * modifier;
-		if (shipsprite.y > (canvas.height - (boarderTopLen + shipsprite.height - buffer *3/2))) {
-			shipsprite.y = canvas.height - (boarderTopLen + shipsprite.height - buffer * 3/2);
+		palyerChar.y += palyerChar.speed * modifier;
+		if (palyerChar.y > (canvas.height - (boarderTopLen + palyerChar.height - buffer *3/2))) {
+			palyerChar.y = canvas.height - (boarderTopLen + palyerChar.height - buffer * 3/2);
 		}
 	}
 	if (37 in keysDown) { // Player holding left
-		shipsprite.x -= shipsprite.speed * modifier ;
-		if (shipsprite.x < (boarderLeftLen - buffer)) {
-			shipsprite.x = boarderTopLen - buffer ;
+		palyerChar.x -= palyerChar.speed * modifier ;
+		if (palyerChar.x < (boarderLeftLen - buffer)) {
+			palyerChar.x = boarderTopLen - buffer ;
 		}
 	}
 	if (39 in keysDown) { // Player holding right
-		shipsprite.x += shipsprite.speed * modifier;
-		if (shipsprite.x > (canvas.width - (boarderLeftLen + shipsprite.width - buffer))) {
-			shipsprite.x = canvas.width - (boarderLeftLen + shipsprite.width - buffer);
+		palyerChar.x += palyerChar.speed * modifier;
+		if (palyerChar.x > (canvas.width - (boarderLeftLen + palyerChar.width - buffer))) {
+			palyerChar.x = canvas.width - (boarderLeftLen + palyerChar.width - buffer);
 		}
 	}
 
@@ -169,10 +169,10 @@ var update = function (modifier) {
 	// Are they touching?
 
 	if (
-		shipsprite.x <= (spacestation.x + spacestation.width) // touch from right of spacestation
-		&& spacestation.x <= (shipsprite.x + shipsprite.width) // touch from the left
-		&& shipsprite.y <= (spacestation.y + shipsprite.height) // touch from the top
-		&& spacestation.y <= (shipsprite.y + spacestation.height)  // touch from the bottom 
+		palyerChar.x <= (spacestation.x + spacestation.width) // touch from right of spacestation
+		&& spacestation.x <= (palyerChar.x + palyerChar.width) // touch from the left
+		&& palyerChar.y <= (spacestation.y + palyerChar.height) // touch from the top
+		&& spacestation.y <= (palyerChar.y + spacestation.height)  // touch from the bottom 
 	) {
 
 		++spacestationsCaught;
@@ -195,12 +195,12 @@ var update = function (modifier) {
 		reset();
 	}
 
-	// When shipsprite was touched by destroyer
+	// When palyerChar was touched by destroyer
 	if (
-		shipsprite.x  <= (destroyer.x + destroyer.width)
-		&& destroyer.x <= (shipsprite.x + shipsprite.width)
-		&& shipsprite.y <= (destroyer.y + shipsprite.height)
-		&& destroyer.y <= (shipsprite.y + destroyer.height)
+		palyerChar.x  <= (destroyer.x + destroyer.width)
+		&& destroyer.x <= (palyerChar.x + palyerChar.width)
+		&& palyerChar.y <= (destroyer.y + palyerChar.height)
+		&& destroyer.y <= (palyerChar.y + destroyer.height)
 	) {
 		alert("The mission was failed!");
 		keysDown = {};
@@ -230,15 +230,15 @@ var render = function () {
 		ctx.drawImage(blImage, canvas.width - boarderLeftLen, 0);
 	}
 
-		// Score. Draw this before the spacestation, shipsprite, and destroyer. So the objects can be on the top of the test
+		// Score. Draw this before the spacestation, palyerChar, and destroyer. So the objects can be on the top of the test
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
 	ctx.fillText("Destroyed: " + spacestationsCaught, boarderTopLen, boarderLeftLen);
 
-	if (shipspriteReady) {
-		ctx.drawImage(shipspriteImage, shipsprite.x, shipsprite.y);
+	if (palyerCharReady) {
+		ctx.drawImage(palyerCharImage, palyerChar.x, palyerChar.y);
 	}
 
 	if (spacestationReady) {
