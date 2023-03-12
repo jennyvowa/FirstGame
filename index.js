@@ -44,7 +44,7 @@ var destroyerImage = new Image();
 destroyerImage.onload = function () {
 	destroyerReady = true;
 };
-destroyerImage.src = "images/destroyer.jpg";
+destroyerImage.src = "images/snack.jpg";
 
 
 // palyerChar image 
@@ -63,7 +63,7 @@ spacestationImage.onload = function () {
 	spacestationReady = true;
 };
 //spacestationImage.src = "images/spacestation.png";
-spacestationImage.src = "images/spacestation.png";
+spacestationImage.src = "images/crown.jpeg";
 
 /*****************************   Main Loop of the game     *************************/
 // Game objects
