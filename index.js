@@ -12,7 +12,7 @@ var soundFailed = "sounds/fail.wav"; //Failed sound efx
 //Assign audio to soundEfx
 var soundEfx = document.getElementById("soundEfx");
 
-//****************    Define Game background, objects   ****************/
+//****************    Define Game background, objects - loading images for objects  ****************/
 // Background image
 var bgReady = false;
 var bgImage = new Image(); // call image object in HTML 
@@ -20,7 +20,6 @@ bgImage.onload = function () {
 	bgReady = true;
 };
 bgImage.src = "images/house.jpg";
-
 
 // border image L-R
 var blReady = false;
@@ -53,16 +52,14 @@ var playerCharImage = new Image();
 playerCharImage.onload = function () {
 	playerCharReady = true;
 };
-//playerCharImage.src = "images/1shipsprite.png";
 playerCharImage.src = "images/zelda_spritesheet.png";
 
-// the pride image: can be a princess, treasure, or a crown, or anything you prefer it to be, Add more images
+// the pride image: can be a princess, treasure, or a crown, or anything you prefer it to be, Add your images here
 var prideReady = false;
 var prideImage = new Image();
 prideImage.onload = function () {
 	prideReady = true;
 };
-//prideImage.src = "images/pride.png";
 prideImage.src = "images/aprincess.png";
 
 // explosion images -> plan to have it when the collision happen. What do you think?
@@ -79,13 +76,13 @@ explosionImage.src = "images/explosion_spritesheet.png";
 // main object manipulated by keyboard left, up, right, down
 var playerChar = {
 	speed: 256, // movement in pixels per second
-	x: 0,  // x,y coordinates to render the sprite
+	x: 0,  // x,y coordinates to render the sprite sheet
 	y: 0,
-	srcX: 0, // x, y coordinates of the canvas to get the single frame
+	srcX: 0, // x, y coordinates of the canvas to get the single frame 
 	scrY: 0,
 	currentFrame: 0,  // start on the left frame
-	column: 5,  // equal frame count or framesPerRowCount
-	row: 4,
+	column: 5,  // equal frame count or framesPerRowCount, columns of the sprite sheet
+	row: 4,  // rows of the sprite sheet
 	trackLeft: 0, // the right row for the movement 
 	trackRight: 1,
 	trackUp: 2,
@@ -168,13 +165,16 @@ var reset = function () {
 var update = function (modifier) {
 	// clear last hero image posistion and assume he is not moving left or rigth
 	ctx.clearRect(playerChar.x, playerChar.y, playerChar.width, playerChar.height);
-	left = false;
-	right = false;
+	playerChar.moveLeft = false;
+	playerChar.moveRight = false;
+	playerChar.moveUp = false;
+	playerChar.moveDown = false;
+	
 
 	if (38 in keysDown) { // Player holding up 
 		playerChar.y -= playerChar.speed * modifier; // make the object move fater or lower
 		if (playerChar.y < (boarderTopLen)) {
-			playerChar.y = boarderTopLen;
+			playerChar.y = boarderTopLen - buffer;
 		}
 		playerChar.moveLeft = false;
 		playerChar.moveRight = false;
@@ -183,8 +183,8 @@ var update = function (modifier) {
 	}
 	if (40 in keysDown) { // Player holding down
 		playerChar.y += playerChar.speed * modifier;
-		if (playerChar.y > (canvas.height - (boarderTopLen + playerChar.height - buffer *3/2))) {
-			playerChar.y = canvas.height - (boarderTopLen + playerChar.height - buffer * 3/2);
+		if (playerChar.y > (canvas.height - (boarderTopLen + playerChar.height - buffer/2))) {
+			playerChar.y = canvas.height - (boarderTopLen + playerChar.height - buffer);
 		}
 		playerChar.moveLeft = false;
 		playerChar.moveRight = false;
@@ -193,8 +193,8 @@ var update = function (modifier) {
 	}
 	if (37 in keysDown) { // Player holding left
 		playerChar.x -= playerChar.speed * modifier ;
-		if (playerChar.x < (boarderLeftLen - buffer)) {
-			playerChar.x = boarderTopLen - buffer ;
+		if (playerChar.x < (boarderLeftLen)) {
+			playerChar.x = boarderTopLen - buffer *2;
 		}
 		playerChar.moveLeft = true;
 		playerChar.moveRight = false;
@@ -204,7 +204,7 @@ var update = function (modifier) {
 	if (39 in keysDown) { // Player holding right
 		playerChar.x += playerChar.speed * modifier;
 		if (playerChar.x > (canvas.width - (boarderLeftLen + playerChar.width - buffer))) {
-			playerChar.x = canvas.width - (boarderLeftLen + playerChar.width - buffer);
+			playerChar.x = canvas.width - (boarderLeftLen + playerChar.width - buffer * 2);
 		}
 		playerChar.moveLeft = false;
 		playerChar.moveRight = true;
