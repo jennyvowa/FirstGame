@@ -103,7 +103,8 @@ var UpperLeftYpointOnSpriteSHeet = 0;
 //Assuming that at start the character will move right side 
 var left = false;
 var right = true;
-
+var up = false;
+var down = false;
 var counter =0;
 
 // Game objects 
@@ -187,12 +188,18 @@ var update = function (modifier) {
 	ctx.clearRect(playerChar.x, playerChar.y, oneSpriteWidth, oneSpriteHeight);
 	left = false;
 	right = false;
+	up = false;
+	down = false;
 
 	if (38 in keysDown) { // Player holding up 
 		playerChar.y -= playerChar.speed * modifier; // make the object move fater or lower
 		if (playerChar.y < (boarderTopLen)) {
 			playerChar.y = boarderTopLen;
 		}
+		left = false;   // for animation
+        right = false; // for animation
+		up = true;
+		down = false;
 
 	}
 	if (40 in keysDown) { // Player holding down
@@ -200,6 +207,10 @@ var update = function (modifier) {
 		if (playerChar.y > (canvas.height - (boarderTopLen + playerChar.height - buffer *3/2))) {
 			playerChar.y = canvas.height - (boarderTopLen + playerChar.height - buffer * 3/2);
 		}
+		left = false;   // for animation
+        right = false; // for animation
+		up = false;
+		down = true;
 	}
 	if (37 in keysDown) { // Player holding left
 		playerChar.x -= playerChar.speed * modifier ;
@@ -208,6 +219,8 @@ var update = function (modifier) {
 		}
 		left = true;   // for animation
         right = false; // for animation
+		up = false;
+		down = false;
 	}
 	if (39 in keysDown) { // Player holding right
 		playerChar.x += playerChar.speed * modifier;
@@ -216,6 +229,8 @@ var update = function (modifier) {
 		}
 		left = false;   // for animation
         right = true; // for animation
+		up = false;
+		down = false;
 	}
 
 	destroyer.x = destroyer.x + (4 * destroyer.direction);
@@ -289,9 +304,20 @@ var update = function (modifier) {
 		//calculating y coordinate for spritesheet
 		srcY = trackRight * oneSpriteHeight;
 	}
+
+	if (up) {
+		//calculate srcY 
+		srcY = trackUp * oneSpriteHeight;
+	}
+	
+	//if the right is true, pick Y dim of the correct row
+	if (down) {
+		//calculating y coordinate for spritesheet
+		srcY = trackDown * oneSpriteHeight;
+	}
 			
 	// not go up or go down, pick 1 image to display - at row 1 col 2 in the sheet
-	if (left == false && right == false) {
+	if (left == false && right == false && up == false && down == false) {
 		srcX = 0 * oneSpriteWidth;
 		srcY = 3 * oneSpriteHeight;
 	}	
