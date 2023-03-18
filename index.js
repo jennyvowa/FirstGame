@@ -53,8 +53,8 @@ var playerCharImage = new Image();
 playerCharImage.onload = function () {
 	playerCharReady = true;
 };
-playerCharImage.src = "images/1shipsprite.png";
-//playerCharImage.src = "images/zelda_spritesheet.png";
+//playerCharImage.src = "images/1shipsprite.png";
+playerCharImage.src = "images/zelda_spritesheet.png";
 
 // the pride image: can be a princess, treasure, or a crown, or anything you prefer it to be, Add more images
 var prideReady = false;
@@ -76,22 +76,22 @@ explosionImage.src = "images/explosion_spritesheet.png";
 /*****************************   Main Loop of the game     *************************/
 // Game objects 
 // for regular object imagge
-var playerChar = {
-	speed: 256,
-	x: 0,
-	y: 0,
-	width: 64,
-	height: 64
-};
+// var playerChar = {
+// 	speed: 256,
+// 	x: 0,
+// 	y: 0,
+// 	width: 64,
+// 	height: 64
+// };
 
 // main object manipulated by keyboard left, up, right, down
-/* var playerChar = {
+var playerChar = {
 	speed: 256, // movement in pixels per second
 	x: 0,  // x,y coordinates to render the sprite
 	y: 0,
 	srcX: 0, // x, y coordinates of the canvas to get the single frame
 	scrY: 0,
-	currentFrame: 4,
+	currentFrame: 0,  // start on the left frame
 	column: 5,  // equal frame count
 	row: 4,
 	trackLeft: 0, // the right row for the movement 
@@ -106,7 +106,7 @@ var playerChar = {
 	sheetHeight: 256,
 	//width: this.sheetWidth/this.column,
 	//height: this.sheetHeight/this.row 
-};*/
+};
 
 // The object is hit 3 times by the main objects to win the game
 var pride = {
