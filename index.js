@@ -53,8 +53,8 @@ var playerCharImage = new Image();
 playerCharImage.onload = function () {
 	playerCharReady = true;
 };
-playerCharImage.src = "images/1shipsprite.png";
-//playerCharImage.src = "images/zelda_spritesheet.png";
+//playerCharImage.src = "images/1shipsprite.png";
+playerCharImage.src = "images/zelda_spritesheet.png";
 
 // the pride image: can be a princess, treasure, or a crown, or anything you prefer it to be, Add more images
 var prideReady = false;
@@ -74,6 +74,38 @@ explosionImage.onload = function () {
 explosionImage.src = "images/explosion_spritesheet.png";
 
 /*****************************   Main Loop of the game     *************************/
+
+// variables for manipulate hero/ pride
+
+// lots of variables to keep track of sprite geometry
+//  I have 8 rows and 3 cols in my space ship sprite sheet
+var rows = 4;
+var cols = 5;
+
+//second row for the right movement (counting the index from 0)
+var trackRight = 1;
+//third row for the left movement (counting the index from 0)
+var trackLeft = 0;
+var trackUp = 2;   // not using up and down in this version, see next version
+var trackDown = 3;
+
+var spriteSheetWidth = 320; // also  spriteWidth/cols; 
+var spriteSheetHeight = 256;  // also spriteHeight/rows; 
+var oneSpriteWidth = spriteSheetWidth / cols; 
+var oneSpriteHeight = spriteSheetHeight / rows; 
+
+var curXFrame = 0; // start on left side
+var framesPerRowCount = 5;  // 5 frames per row = cols
+//x and y coordinates of the overall sprite image to get the single frame  we want
+var UpperLeftXpointOnSpriteSHeet = 0;  // our image has no borders or other stuff
+var UpperLeftYpointOnSpriteSHeet = 0;
+
+//Assuming that at start the character will move right side 
+var left = false;
+var right = true;
+
+var counter =0;
+
 // Game objects 
 // for regular object imagge
 var playerChar = {
@@ -84,29 +116,7 @@ var playerChar = {
 	height: 64
 };
 
-// main object manipulated by keyboard left, up, right, down
-/* var playerChar = {
-	speed: 256, // movement in pixels per second
-	x: 0,  // x,y coordinates to render the sprite
-	y: 0,
-	srcX: 0, // x, y coordinates of the canvas to get the single frame
-	scrY: 0,
-	currentFrame: 4,
-	column: 5,  // equal frame count
-	row: 4,
-	trackLeft: 0, // the right row for the movement 
-	trackRight: 1,
-	trackUp: 2,
-	trackDown: 3,
-	moveLeft: false,
-	moveRight: false,
-	moveUp: false,
-	moveDown: true,
-	sheetWidth: 320, // size of sprite sheet
-	sheetHeight: 256,
-	//width: this.sheetWidth/this.column,
-	//height: this.sheetHeight/this.row 
-};*/
+
 
 // The object is hit 3 times by the main objects to win the game
 var pride = {
@@ -173,10 +183,10 @@ var reset = function () {
 
 // Update game objects
 var update = function (modifier) {
-	//update the frame index  for animation -> need more work to make it work in our code 
-	//playerChar.currentFrame = ++playerChar.currentFrame % playerChar.column;
-	// calculate the x coordinate for spritesheeet 
-	//playerChar.srcX = playerChar.currentFrame * playerChar.sheetWidth/ playerChar.column;
+	// clear last hero image posistion and assume he is not moving left or rigth
+	ctx.clearRect(playerChar.x, playerChar.y, oneSpriteWidth, oneSpriteHeight);
+	left = false;
+	right = false;
 
 	if (38 in keysDown) { // Player holding up 
 		playerChar.y -= playerChar.speed * modifier; // make the object move fater or lower
@@ -196,12 +206,16 @@ var update = function (modifier) {
 		if (playerChar.x < (boarderLeftLen - buffer)) {
 			playerChar.x = boarderTopLen - buffer ;
 		}
+		left = true;   // for animation
+        right = false; // for animation
 	}
 	if (39 in keysDown) { // Player holding right
 		playerChar.x += playerChar.speed * modifier;
 		if (playerChar.x > (canvas.width - (boarderLeftLen + playerChar.width - buffer))) {
 			playerChar.x = canvas.width - (boarderLeftLen + playerChar.width - buffer);
 		}
+		left = false;   // for animation
+        right = true; // for animation
 	}
 
 	destroyer.x = destroyer.x + (4 * destroyer.direction);
@@ -249,6 +263,39 @@ var update = function (modifier) {
 		reset();
 	}
 
+	//for animation after touching 
+	//curXFrame = ++curXFrame % framesPerRowCount; 	//equal cols, Updating the sprite frame index  
+	//slow animation if walking or whatever doesn't look good
+	//add a counter varible to only change frame every nth loop
+
+	if (counter == 5) {  // adjust this to change "walking speed" of animation
+        curXFrame = ++curXFrame % framesPerRowCount; 	//Updating the sprite frame index 
+        // it will count 0,1,2,0,1,2,0, etc
+        counter = 0;
+    } else {
+        counter++;
+    }
+
+	// it will count 0,1,2,0,1,2,0, etc
+	srcX = curXFrame * oneSpriteWidth;   	//Calculating the x coordinate for spritesheet 
+	//if left is true,  pick Y dim of the correct row
+	if (left) {
+		//calculate srcY 
+		srcY = trackLeft * oneSpriteHeight;
+	}
+	
+	//if the right is true, pick Y dim of the correct row
+	if (right) {
+		//calculating y coordinate for spritesheet
+		srcY = trackRight * oneSpriteHeight;
+	}
+			
+	// not go up or go down, pick 1 image to display - at row 1 col 2 in the sheet
+	if (left == false && right == false) {
+		srcX = 0 * oneSpriteWidth;
+		srcY = 3 * oneSpriteHeight;
+	}	
+
 	// When playerChar was touched by destroyer
 	if (
 		playerChar.x  <= (destroyer.x + destroyer.width)
@@ -292,9 +339,9 @@ var render = function () {
 	ctx.fillText("Destroyed: " + pridesCaught, boarderTopLen, boarderLeftLen);
 
 	if (playerCharReady) {
-		ctx.drawImage(playerCharImage, playerChar.x, playerChar.y);
+		//ctx.drawImage(playerCharImage, playerChar.x, playerChar.y);
 		// For animation 
-		//ctx.drawImage(playerCharImage, playerChar.srcX, playerChar.srcY, playerChar.width, playerChar.height, playerChar.x, playerChar.y, playerChar.width, playerChar.height);
+		ctx.drawImage(playerCharImage, srcX, srcY, oneSpriteWidth, oneSpriteHeight,  playerChar.x, playerChar.y, oneSpriteWidth, oneSpriteHeight);
 	}
 
 	if (prideReady) {
