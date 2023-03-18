@@ -75,14 +75,6 @@ explosionImage.src = "images/explosion_spritesheet.png";
 
 /*****************************   Main Loop of the game     *************************/
 // Game objects 
-// for regular object imagge
-// var playerChar = {
-// 	speed: 256,
-// 	x: 0,
-// 	y: 0,
-// 	width: 64,
-// 	height: 64
-// };
 
 // main object manipulated by keyboard left, up, right, down
 var playerChar = {
@@ -92,7 +84,7 @@ var playerChar = {
 	srcX: 0, // x, y coordinates of the canvas to get the single frame
 	scrY: 0,
 	currentFrame: 0,  // start on the left frame
-	column: 5,  // equal frame count
+	column: 5,  // equal frame count or framesPerRowCount
 	row: 4,
 	trackLeft: 0, // the right row for the movement 
 	trackRight: 1,
@@ -104,8 +96,9 @@ var playerChar = {
 	moveDown: true,
 	sheetWidth: 320, // size of sprite sheet
 	sheetHeight: 256,
-	//width: this.sheetWidth/this.column,
-	//height: this.sheetHeight/this.row 
+	width: 320/5,  // equal oneSpriteWidth
+	height: 256/4,    // equal oneSpriteHeight
+	counter: 0
 };
 
 // The object is hit 3 times by the main objects to win the game
@@ -173,35 +166,50 @@ var reset = function () {
 
 // Update game objects
 var update = function (modifier) {
-	//update the frame index  for animation -> need more work to make it work in our code 
-	//playerChar.currentFrame = ++playerChar.currentFrame % playerChar.column;
-	// calculate the x coordinate for spritesheeet 
-	//playerChar.srcX = playerChar.currentFrame * playerChar.sheetWidth/ playerChar.column;
+	// clear last hero image posistion and assume he is not moving left or rigth
+	ctx.clearRect(playerChar.x, playerChar.y, playerChar.width, playerChar.height);
+	left = false;
+	right = false;
 
 	if (38 in keysDown) { // Player holding up 
 		playerChar.y -= playerChar.speed * modifier; // make the object move fater or lower
 		if (playerChar.y < (boarderTopLen)) {
 			playerChar.y = boarderTopLen;
 		}
-
+		playerChar.moveLeft = false;
+		playerChar.moveRight = false;
+		playerChar.moveUp = true;
+		playerChar.moveDown = false;
 	}
 	if (40 in keysDown) { // Player holding down
 		playerChar.y += playerChar.speed * modifier;
 		if (playerChar.y > (canvas.height - (boarderTopLen + playerChar.height - buffer *3/2))) {
 			playerChar.y = canvas.height - (boarderTopLen + playerChar.height - buffer * 3/2);
 		}
+		playerChar.moveLeft = false;
+		playerChar.moveRight = false;
+		playerChar.moveUp = false;
+		playerChar.moveDown = true;
 	}
 	if (37 in keysDown) { // Player holding left
 		playerChar.x -= playerChar.speed * modifier ;
 		if (playerChar.x < (boarderLeftLen - buffer)) {
 			playerChar.x = boarderTopLen - buffer ;
 		}
+		playerChar.moveLeft = true;
+		playerChar.moveRight = false;
+		playerChar.moveUp = false;
+		playerChar.moveDown = false;
 	}
 	if (39 in keysDown) { // Player holding right
 		playerChar.x += playerChar.speed * modifier;
 		if (playerChar.x > (canvas.width - (boarderLeftLen + playerChar.width - buffer))) {
 			playerChar.x = canvas.width - (boarderLeftLen + playerChar.width - buffer);
 		}
+		playerChar.moveLeft = false;
+		playerChar.moveRight = true;
+		playerChar.moveUp = false;
+		playerChar.moveDown = false;
 	}
 
 	destroyer.x = destroyer.x + (4 * destroyer.direction);
@@ -249,6 +257,51 @@ var update = function (modifier) {
 		reset();
 	}
 
+		//for animation after touching 
+	//curXFrame = ++curXFrame % framesPerRowCount; 	//equal cols, Updating the sprite frame index  
+	//slow animation if walking or whatever doesn't look good
+	//add a counter varible to only change frame every nth loop
+
+	if (playerChar.counter == 5) {  // adjust this to change "walking speed" of animation
+        playerChar.currentFrame = ++playerChar.currentFrame % playerChar.column; 	//Updating the sprite frame index 
+        // it will count 0,1,2,0,1,2,0, etc
+        playerChar.counter = 0;
+    } else {
+        playerChar.counter++;
+    }
+
+	// it will count 0,1,2,0,1,2,0, etc
+	playerChar.srcX = playerChar.currentFrame * playerChar.width;   	//Calculating the x coordinate for spritesheet 
+	//if left is true,  pick Y dim of the correct row
+	if (playerChar.moveLeft) {
+		//calculate srcY 
+		playerChar.srcY = playerChar.trackLeft * playerChar.height;
+	}
+
+	//if the right is true, pick Y dim of the correct row
+	if (playerChar.moveRight) {
+		//calculating y coordinate for spritesheet
+		playerChar.srcY = playerChar.trackRight * playerChar.height;
+	}
+
+	if (playerChar.moveUp) {
+		//calculate srcY 
+		playerChar.srcY = playerChar.trackUp * playerChar.height;
+	}
+
+	//if the right is true, pick Y dim of the correct row
+	if (playerChar.moveDown) {
+		//calculating y coordinate for spritesheet
+		playerChar.srcY = playerChar.trackDown * playerChar.height;
+	}
+
+
+	// not go up or go down, pick 1 image to display - at row 1 col 2 in the sheet
+	if (playerChar.moveLeft == false && playerChar.moveRight == false & playerChar.moveUp == false && playerChar.moveDown == false) {
+		playerChar.srcX = 0 * playerChar.width;
+		playerChar.srcY = 3 * playerChar.height;
+	}
+
 	// When playerChar was touched by destroyer
 	if (
 		playerChar.x  <= (destroyer.x + destroyer.width)
@@ -292,9 +345,9 @@ var render = function () {
 	ctx.fillText("Destroyed: " + pridesCaught, boarderTopLen, boarderLeftLen);
 
 	if (playerCharReady) {
-		ctx.drawImage(playerCharImage, playerChar.x, playerChar.y);
+		//ctx.drawImage(playerCharImage, playerChar.x, playerChar.y);
 		// For animation 
-		//ctx.drawImage(playerCharImage, playerChar.srcX, playerChar.srcY, playerChar.width, playerChar.height, playerChar.x, playerChar.y, playerChar.width, playerChar.height);
+		ctx.drawImage(playerCharImage, playerChar.srcX, playerChar.srcY, playerChar.width, playerChar.height, playerChar.x, playerChar.y, playerChar.width, playerChar.height);
 	}
 
 	if (prideReady) {
