@@ -214,10 +214,10 @@ var update = function (modifier) {
 
 	destroyer.x = destroyer.x + (4 * destroyer.direction);
 	if (destroyer.x >= canvas.width - boarderLeftLen - destroyer.width) { // go right
-		destroyer.direction = -1;
+		destroyer.direction = Math.random() * (-2);
 	}
 	if (destroyer.x <= boarderTopLen) {   // go left
-		destroyer.direction = 1;
+		destroyer.direction = Math.random() * 2;
 	}
 
 	destroyer.y = destroyer.y + (4 * destroyer.direction);
@@ -228,17 +228,11 @@ var update = function (modifier) {
 		destroyer.direction = 0.8;
 	}
 
-	// Are they touching?
+	// Are they touching? // player touch the 
 
-	if (
-		playerChar.x <= (pride.x + pride.width) // touch from right of pride
-		&& pride.x <= (playerChar.x + playerChar.width) // touch from the left
-		&& playerChar.y <= (pride.y + playerChar.height) // touch from the top
-		&& pride.y <= (playerChar.y + pride.height)  // touch from the bottom 
-	) {
+	if ( isTouching(playerChar, pride)) {
 
 		++pridesCaught;
-
 		// insert play sounds where you want them to happen
 
 		if (pridesCaught === 3) {
@@ -251,18 +245,16 @@ var update = function (modifier) {
 		} else {
 			soundEfx.src = soundCaught;
 			soundEfx.play();
-
 		}
-
 		reset();
 	}
 
-		//for animation after touching 
+	//for animation after touching 
 	//curXFrame = ++curXFrame % framesPerRowCount; 	//equal cols, Updating the sprite frame index  
 	//slow animation if walking or whatever doesn't look good
 	//add a counter varible to only change frame every nth loop
 
-	if (playerChar.counter == 5) {  // adjust this to change "walking speed" of animation
+	if (playerChar.counter == playerChar.column) {  // adjust this to change "walking speed" of animation
         playerChar.currentFrame = ++playerChar.currentFrame % playerChar.column; 	//Updating the sprite frame index 
         // it will count 0,1,2,0,1,2,0, etc
         playerChar.counter = 0;
@@ -275,40 +267,30 @@ var update = function (modifier) {
 	//if left is true,  pick Y dim of the correct row
 	if (playerChar.moveLeft) {
 		//calculate srcY 
-		playerChar.srcY = playerChar.trackLeft * playerChar.height;
+		playerChar.srcY = playerChar.trackLeft * playerChar.height; // row index in sheet * sprite height
 	}
-
 	//if the right is true, pick Y dim of the correct row
 	if (playerChar.moveRight) {
 		//calculating y coordinate for spritesheet
 		playerChar.srcY = playerChar.trackRight * playerChar.height;
 	}
-
 	if (playerChar.moveUp) {
 		//calculate srcY 
 		playerChar.srcY = playerChar.trackUp * playerChar.height;
 	}
-
-	//if the right is true, pick Y dim of the correct row
+	//if moveDown is true
 	if (playerChar.moveDown) {
 		//calculating y coordinate for spritesheet
 		playerChar.srcY = playerChar.trackDown * playerChar.height;
 	}
-
-
-	// not go up or go down, pick 1 image to display - at row 1 col 2 in the sheet
+	// player not moving, pick an image at row index 3, column 0 in the spritesheet
 	if (playerChar.moveLeft == false && playerChar.moveRight == false & playerChar.moveUp == false && playerChar.moveDown == false) {
 		playerChar.srcX = 0 * playerChar.width;
 		playerChar.srcY = 3 * playerChar.height;
 	}
-
-	// When playerChar was touched by destroyer
-	if (
-		playerChar.x  <= (destroyer.x + destroyer.width)
-		&& destroyer.x <= (playerChar.x + playerChar.width)
-		&& playerChar.y <= (destroyer.y + playerChar.height)
-		&& destroyer.y <= (playerChar.y + destroyer.height)
-	) {
+	// When playerChar and destroyer touch each other
+	if ( isTouching(playerChar, destroyer)) 
+	{
 		alert("The mission was failed!");
 		keysDown = {};
 		pridesCaught = 0;
@@ -318,46 +300,44 @@ var update = function (modifier) {
 	}
 };
 
-
-
-// Draw everything
+// Draw objects
 var render = function () {
 	// Draw backgroud first, then draw other objects on the top of background 
 	if (bgReady) {
 		ctx.drawImage(bgImage, 0, 0);
 	}
-
 	if (btReady) {
 		ctx.drawImage(btImage, 0, 0);
 		ctx.drawImage(btImage, 0, canvas.height - boarderTopLen);
 	}
-
 	if (blReady) {
 		ctx.drawImage(blImage, 0, 0);
 		ctx.drawImage(blImage, canvas.width - boarderLeftLen, 0);
 	}
-
-		// Score. Draw this before the pride, playerChar, and destroyer. So the objects can be on the top of the test
+	// Score. Draw this before the pride, playerChar, and destroyer. So the objects can be on the top of the test
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
 	ctx.fillText("Destroyed: " + pridesCaught, boarderTopLen, boarderLeftLen);
-
 	if (playerCharReady) {
-		//ctx.drawImage(playerCharImage, playerChar.x, playerChar.y);
 		// For animation 
 		ctx.drawImage(playerCharImage, playerChar.srcX, playerChar.srcY, playerChar.width, playerChar.height, playerChar.x, playerChar.y, playerChar.width, playerChar.height);
 	}
-
 	if (prideReady) {
 		ctx.drawImage(prideImage, pride.x, pride.y);
 	}
-
 	if (destroyerReady) {
 		ctx.drawImage(destroyerImage, destroyer.x, destroyer.y);
 	}
+};
 
+// Helper functions
+function isTouching (player, object) {
+	return (player.x >= (object.x - player.width/2) // touch from left of pride
+	&& player.x <= (object.x + object.width * 3/4) // touch from the right
+	&& player.y >= (object.y - player.height * 3/4) // touch from the top
+	&& player.y <= (object.y + object.height * 3/4) ) // touch from the bottom
 };
 
 /************************* The main game loop   **********************/
@@ -369,10 +349,8 @@ var main = function () {
 	render(); 
 	then = now;
 
-
 	//  Request to do this again ASAP , call the main method over and over again, so our players can move and be re-drawn
 	requestAnimationFrame(main);
-
 };
 
 /***********************    Let's play this game!   **************************/
