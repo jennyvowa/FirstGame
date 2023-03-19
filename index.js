@@ -19,7 +19,8 @@ var bgImage = new Image(); // call image object in HTML
 bgImage.onload = function () {
 	bgReady = true;
 };
-bgImage.src = "images/house.jpg";
+//bgImage.src = "images/house.jpg";
+bgImage.src = "images/sea2a.png";
 
 // border image L-R
 var blReady = false;
@@ -43,8 +44,15 @@ var destroyerImage = new Image();
 destroyerImage.onload = function () {
 	destroyerReady = true;
 };
-destroyerImage.src = "images/destroyer.jpg";
+destroyerImage.src = "images/sea_demon4.png";
 
+// playerChar image 
+var boatReady = false;
+var boatImage = new Image();
+boatImage.onload = function () {
+	boatReady = true;
+};
+boatImage.src = "images/boat4.png";
 
 // playerChar image 
 var playerCharReady = false;
@@ -62,13 +70,13 @@ prideImage.onload = function () {
 };
 prideImage.src = "images/aprincess.png";
 
-// explosion images -> plan to have it when the collision happen. What do you think?
-var explosionReady = false;
-var explosionImage = new Image();
-explosionImage.onload = function () {
-	explosionReady = true;
+// destroyer2 images -> plan to have it when the collision happen. What do you think?
+var destroyer2Ready = false;
+var destroyer2Image = new Image();
+destroyer2Image.onload = function () {
+	destroyer2Ready = true;
 };
-explosionImage.src = "images/aspider_pre.png";
+destroyer2Image.src = "images/aspider_pre.png";
 
 
 /*****************************   Main Loop of the game     *************************/
@@ -116,15 +124,23 @@ var destroyer = {
 	direction: 1
 };
 
+// escapse objects
+var boat = {
+	x: 0,
+	y: 0,
+	width: 187,
+	height: 156,
+};
+
 // display when main object touching destroyer. Can use it for animation as well
-var explosion = {
+var destroyer2 = {
 	x: 0,
 	y: 0,
 	column: 6,
 	row: 6,
 	srcX: 0, // x, y coordinates of the canvas to get the single frame 
 	scrY: 2 * 300/6,
-	trackExplosion: 2,
+	trackdestroyer2: 2,
 	sheetWidth: 300,
 	sheetHeight: 300,
 	width: 49,
@@ -136,6 +152,7 @@ var pridesCaught = 0;
 var boarderTopLen = 32;
 var boarderLeftLen = 32;
 var buffer = 10
+
 
 // Handle keyboard controls
 var keysDown = {}; // object were we add up to 4 properties when keys go down
@@ -153,19 +170,26 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a pride
 var reset = function () {
+	var arrayLen = [];
+	arrayLen.push(canvas.width - boarderLeftLen - boat.width, boarderLeftLen , canvas.height - boarderTopLen - boat.height);
 	//Place the playerChar in the middle of canvas
 	playerChar.x = canvas.width / 2;
 	playerChar.y = canvas.height / 2;
+	console.log(arrayLen);
 
 	//Place the pride somewhere on the screen randomly
 	pride.x = boarderTopLen + (Math.random() * (canvas.width - 150));
 	pride.y = boarderLeftLen + (Math.random() * (canvas.height - 148));
+	boat.x = arrayLen[Math.floor(Math.random() * 2)];
+	boat.y = arrayLen[Math.floor(1 + Math.random() * 2)];
+	console.log(boat.x);
+	console.log(boat.y);
 	destroyer.x = boarderLeftLen + (Math.random() * (canvas.width - 150));
 	destroyer.y = boarderTopLen + (Math.random() * (canvas.height - 148));
 	destroyer.direction = 1;
-	explosion.x = pride.x + 50;
-	explosion.y = pride.y + Math.random()*10 + 50;
-	explosion.direction = 1;
+	destroyer2.x = pride.x + 50;
+	destroyer2.y = pride.y + Math.random()*10 + 50;
+	destroyer2.direction = 1;
 };
 
 // Update game objects
@@ -220,7 +244,7 @@ var update = function (modifier) {
 	}
 
 	moveObjects(destroyer);
-	moveObjects(explosion);
+	moveObjects(destroyer2);
 
 	// Are they touching? // player touch the 
 
@@ -282,11 +306,11 @@ var update = function (modifier) {
 		playerChar.srcY = 3 * playerChar.height;
 	}
 
-	//explosion.srcX = 0;
-	//explosion.srcX = 100;
+	//destroyer2.srcX = 0;
+	//destroyer2.srcX = 100;
 	// When playerChar and destroyer touch each other
 	gameOver(playerChar, destroyer);
-	gameOver(playerChar, explosion);
+	gameOver(playerChar, destroyer2);
 
 };
 
@@ -304,12 +328,15 @@ var render = function () {
 		ctx.drawImage(blImage, 0, 0);
 		ctx.drawImage(blImage, canvas.width - boarderLeftLen, 0);
 	}
+	if (boatReady) {
+		ctx.drawImage(boatImage, boat.x, boat.y);
+	}
 	// Score. Draw this before the pride, playerChar, and destroyer. So the objects can be on the top of the test
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText("Destroyed: " + pridesCaught, boarderTopLen, boarderLeftLen);
+	ctx.fillText("Rescue: " + pridesCaught, boarderTopLen, boarderLeftLen);
 	if (playerCharReady) {
 		// For animation 
 		ctx.drawImage(playerCharImage, playerChar.srcX, playerChar.srcY, playerChar.width, playerChar.height, playerChar.x, playerChar.y, playerChar.width, playerChar.height);
@@ -320,9 +347,9 @@ var render = function () {
 	if (destroyerReady) {
 		ctx.drawImage(destroyerImage, destroyer.x, destroyer.y);
 	}
-	if (explosionReady) {
-		//ctx.drawImage(explosionImage, explosion.srcX, explosion.srcY, explosion.width, explosion.height, explosion.x, explosion.y, explosion.width, explosion.height);
-		ctx.drawImage(explosionImage, explosion.x, explosion.y);
+	if (destroyer2Ready) {
+		//ctx.drawImage(destroyer2Image, destroyer2.srcX, destroyer2.srcY, destroyer2.width, destroyer2.height, destroyer2.x, destroyer2.y, destroyer2.width, destroyer2.height);
+		ctx.drawImage(destroyer2Image, destroyer2.x, destroyer2.y);
 	}
 };
 
