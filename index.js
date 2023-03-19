@@ -68,7 +68,8 @@ var explosionImage = new Image();
 explosionImage.onload = function () {
 	explosionReady = true;
 };
-explosionImage.src = "images/explosion_spritesheet.png";
+explosionImage.src = "images/aspider_pre.png";
+
 
 /*****************************   Main Loop of the game     *************************/
 // Game objects 
@@ -121,11 +122,14 @@ var explosion = {
 	y: 0,
 	column: 6,
 	row: 6,
+	srcX: 0, // x, y coordinates of the canvas to get the single frame 
+	scrY: 2 * 300/6,
 	trackExplosion: 2,
 	sheetWidth: 300,
 	sheetHeight: 300,
-	//width: this.sheetWidth/this.column,
-	//height: this.sheetHeight/this.row,
+	width: 49,
+	height: 41,
+	direction: 1
 };
 
 var pridesCaught = 0;
@@ -159,11 +163,14 @@ var reset = function () {
 	destroyer.x = boarderLeftLen + (Math.random() * (canvas.width - 150));
 	destroyer.y = boarderTopLen + (Math.random() * (canvas.height - 148));
 	destroyer.direction = 1;
+	explosion.x = pride.x + 50;
+	explosion.y = pride.y + Math.random()*10 + 50;
+	explosion.direction = 1;
 };
 
 // Update game objects
 var update = function (modifier) {
-	// clear last hero image posistion and assume he is not moving left or rigth
+	// clear last player image posistion and assume he is not moving
 	ctx.clearRect(playerChar.x, playerChar.y, playerChar.width, playerChar.height);
 	playerChar.moveLeft = false;
 	playerChar.moveRight = false;
@@ -212,29 +219,15 @@ var update = function (modifier) {
 		playerChar.moveDown = false;
 	}
 
-	destroyer.x = destroyer.x + (4 * destroyer.direction);
-	if (destroyer.x >= canvas.width - boarderLeftLen - destroyer.width) { // go right
-		destroyer.direction = Math.random() * (-2);
-	}
-	if (destroyer.x <= boarderTopLen) {   // go left
-		destroyer.direction = Math.random() * 2;
-	}
-
-	destroyer.y = destroyer.y + (4 * destroyer.direction);
-	if (destroyer.y >= canvas.height - boarderTopLen - destroyer.height) {  // go top
-		destroyer.direction = -1.5;
-	}
-	if (destroyer.y <= boarderTopLen) {   // go bottom 
-		destroyer.direction = 0.8;
-	}
+	moveObjects(destroyer);
+	moveObjects(explosion);
 
 	// Are they touching? // player touch the 
 
-	if ( isTouching(playerChar, pride)) {
-
+	if ( isTouching(playerChar, pride)) 
+	{
 		++pridesCaught;
 		// insert play sounds where you want them to happen
-
 		if (pridesCaught === 3) {
 			// change sound effect and play it.
 			soundEfx.src = soundGameOver;
@@ -288,16 +281,13 @@ var update = function (modifier) {
 		playerChar.srcX = 0 * playerChar.width;
 		playerChar.srcY = 3 * playerChar.height;
 	}
+
+	//explosion.srcX = 0;
+	//explosion.srcX = 100;
 	// When playerChar and destroyer touch each other
-	if ( isTouching(playerChar, destroyer)) 
-	{
-		alert("The mission was failed!");
-		keysDown = {};
-		pridesCaught = 0;
-		soundEfx.src = soundFailed;
-		soundEfx.play();
-		reset();
-	}
+	gameOver(playerChar, destroyer);
+	gameOver(playerChar, explosion);
+
 };
 
 // Draw objects
@@ -330,6 +320,10 @@ var render = function () {
 	if (destroyerReady) {
 		ctx.drawImage(destroyerImage, destroyer.x, destroyer.y);
 	}
+	if (explosionReady) {
+		//ctx.drawImage(explosionImage, explosion.srcX, explosion.srcY, explosion.width, explosion.height, explosion.x, explosion.y, explosion.width, explosion.height);
+		ctx.drawImage(explosionImage, explosion.x, explosion.y);
+	}
 };
 
 // Helper functions
@@ -340,6 +334,35 @@ function isTouching (player, object) {
 	&& player.y <= (object.y + object.height * 3/4) ) // touch from the bottom
 };
 
+function moveObjects (object) {
+	object.x = object.x + (4 * object.direction);
+	if (object.x >= canvas.width - boarderLeftLen - object.width) { // go right
+		object.direction = Math.random() * (-2);
+	}
+	if (object.x <= boarderTopLen) {   // go left
+		object.direction = Math.random() * 2;
+	}
+
+	object.y = object.y + (4 * object.direction);
+	if (object.y >= canvas.height - boarderTopLen - object.height) {  // go top
+		object.direction = -1.5;
+	}
+	if (object.y <= boarderTopLen) {   // go bottom 
+		object.direction = 0.8;
+	}
+}
+
+function gameOver (player, destroyer){
+	if ( isTouching(player, destroyer)) 
+	{
+		alert("The mission was failed!");
+		keysDown = {};
+		pridesCaught = 0;
+		soundEfx.src = soundFailed;
+		soundEfx.play();
+		reset();
+	}
+}
 /************************* The main game loop   **********************/
 var main = function () {
 	// This chunk of code will be called over again by this: requestAnimationFrame(main);
