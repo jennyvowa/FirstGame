@@ -14,13 +14,14 @@ var soundEfx = document.getElementById("soundEfx");
 
 //****************    Define Game background, objects - loading images for objects  ****************/
 // Background image
+var switchObjects = 1;
+
 var bgReady = false;
 var bgImage = new Image(); // call image object in HTML 
 bgImage.onload = function () {
 	bgReady = true;
 };
-//bgImage.src = "images/house.jpg";
-bgImage.src = "images/sea2a.png";
+//bgImage.src = "images/sea2a.png";
 
 // border image L-R
 var blReady = false;
@@ -38,21 +39,21 @@ btImage.onload = function () {
 };
 btImage.src = "images/BorderTop.jpg";
 
-// destroyer image
-var destroyerReady = false;
-var destroyerImage = new Image();
-destroyerImage.onload = function () {
-	destroyerReady = true;
-};
-destroyerImage.src = "images/sea_demon4.png";
-
 // playerChar image 
 var boatReady = false;
 var boatImage = new Image();
 boatImage.onload = function () {
 	boatReady = true;
 };
-boatImage.src = "images/boat4.png";
+//boatImage.src = "images/boat4.png";
+
+// destroyer image
+var destroyerReady = false;
+var destroyerImage = new Image();
+destroyerImage.onload = function () {
+	destroyerReady = true;
+};
+//destroyerImage.src = "images/sea_demon4.png";
 
 // playerChar image 
 var playerCharReady = false;
@@ -76,8 +77,13 @@ var destroyer2Image = new Image();
 destroyer2Image.onload = function () {
 	destroyer2Ready = true;
 };
-destroyer2Image.src = "images/aspider_pre.png";
+//destroyer2Image.src = "images/aspider_pre.png";
 
+if(switchObjects === 1){
+	imagesSea ();
+}else{
+	imagesHouse ();
+}
 
 /*****************************   Main Loop of the game     *************************/
 // Game objects 
@@ -148,10 +154,16 @@ var destroyer2 = {
 	direction: 1
 };
 
+if(switchObjects === 1){
+	setWHObjectSea ();
+}
+else{
+	setWHObjectHouse ();
+}
 var pridesCaught = 0;
 var boarderTopLen = 32;
 var boarderLeftLen = 32;
-var buffer = 10
+var buffer = 10;
 
 
 // Handle keyboard controls
@@ -175,15 +187,13 @@ var reset = function () {
 	//Place the playerChar in the middle of canvas
 	playerChar.x = canvas.width / 2;
 	playerChar.y = canvas.height / 2;
-	console.log(arrayLen);
+	//console.log(arrayLen);
 
 	//Place the pride somewhere on the screen randomly
 	pride.x = boarderTopLen + (Math.random() * (canvas.width - 150));
 	pride.y = boarderLeftLen + (Math.random() * (canvas.height - 148));
 	boat.x = arrayLen[Math.floor(Math.random() * 2)];
 	boat.y = arrayLen[Math.floor(1 + Math.random() * 2)];
-	console.log(boat.x);
-	console.log(boat.y);
 	destroyer.x = boarderLeftLen + (Math.random() * (canvas.width - 150));
 	destroyer.y = boarderTopLen + (Math.random() * (canvas.height - 148));
 	destroyer.direction = 1;
@@ -263,6 +273,7 @@ var update = function (modifier) {
 			soundEfx.src = soundCaught;
 			soundEfx.play();
 		}
+		switchObjects = 1;
 		reset();
 	}
 
@@ -309,6 +320,7 @@ var update = function (modifier) {
 	//destroyer2.srcX = 0;
 	//destroyer2.srcX = 100;
 	// When playerChar and destroyer touch each other
+	redrawGame(playerChar, boat);
 	gameOver(playerChar, destroyer);
 	gameOver(playerChar, destroyer2);
 
@@ -381,15 +393,72 @@ function moveObjects (object) {
 
 function gameOver (player, destroyer){
 	if ( isTouching(player, destroyer)) 
-	{
+	{		
 		alert("The mission was failed!");
 		keysDown = {};
 		pridesCaught = 0;
 		soundEfx.src = soundFailed;
 		soundEfx.play();
+		switchObjects = 1;
 		reset();
 	}
 }
+
+function redrawGame(player, boat){
+	if ( isTouching(player, boat)){
+		keysDown = {};
+		switchObjects = switchObjects * (-1);
+		// switch images 
+
+		if(switchObjects === 1){
+			imagesSea();
+			setWHObjectSea();
+		}
+		else{
+			imagesHouse ();
+			setWHObjectHouse ();
+		};
+		
+		// update new x,y for playerChar
+		playerChar.x = pride.x + 20;
+		playerChar.y = pride.y + pride.height + 20;
+		render();
+	}
+};
+
+function imagesSea () {
+	bgImage.src = "images/sea2a.png";
+	boatImage.src = "images/boat4.png";
+	destroyerImage.src = "images/sea_demon4.png";
+	destroyer2Image.src = "images/aspider_pre.png";
+};
+
+function imagesHouse () {
+	bgImage.src = "images/house.jpg";		
+	boatImage.src = "images/spacestation.png";
+	destroyerImage.src = "images/2ghost.png";
+	destroyer2Image.src = "images/2spider.png";
+};
+
+function setWHObjectSea () {
+	boat.width = 187;
+	boat.height = 156;
+	destroyer.width = 89;
+	destroyer.height = 80;
+	destroyer2.width = 49;
+	destroyer2.height = 41;
+};
+
+function setWHObjectHouse () {
+	boat.width = 85;
+	boat.height = 85;
+	destroyer.width = 72;
+	destroyer.height = 45;
+	destroyer2.width = 118;
+	destroyer2.height = 42;
+};
+
+
 /************************* The main game loop   **********************/
 var main = function () {
 	// This chunk of code will be called over again by this: requestAnimationFrame(main);
