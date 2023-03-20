@@ -21,7 +21,7 @@ var bgImage = new Image(); // call image object in HTML
 bgImage.onload = function () {
 	bgReady = true;
 };
-//bgImage.src = "images/sea2a.png";
+bgImage.src = "images/sea2a.png";
 
 // border image L-R
 var blReady = false;
@@ -45,7 +45,7 @@ var boatImage = new Image();
 boatImage.onload = function () {
 	boatReady = true;
 };
-//boatImage.src = "images/boat4.png";
+boatImage.src = "images/boat4.png";
 
 // destroyer image
 var destroyerReady = false;
@@ -53,7 +53,7 @@ var destroyerImage = new Image();
 destroyerImage.onload = function () {
 	destroyerReady = true;
 };
-//destroyerImage.src = "images/sea_demon4.png";
+destroyerImage.src = "images/sea_demon4.png";
 
 // playerChar image 
 var playerCharReady = false;
@@ -77,13 +77,8 @@ var destroyer2Image = new Image();
 destroyer2Image.onload = function () {
 	destroyer2Ready = true;
 };
-//destroyer2Image.src = "images/aspider_pre.png";
+destroyer2Image.src = "images/aspider_pre.png";
 
-if(switchObjects === 1){
-	imagesSea ();
-}else{
-	imagesHouse ();
-}
 
 /*****************************   Main Loop of the game     *************************/
 // Game objects 
@@ -154,12 +149,6 @@ var destroyer2 = {
 	direction: 1
 };
 
-if(switchObjects === 1){
-	setWHObjectSea ();
-}
-else{
-	setWHObjectHouse ();
-}
 var pridesCaught = 0;
 var boarderTopLen = 32;
 var boarderLeftLen = 32;
@@ -182,12 +171,19 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a pride
 var reset = function () {
+	if(switchObjects === 1){
+		boat.width = 187;
+		boat.height = 156;
+	}else{
+		boat.width = 85;
+		boat.height = 85;
+	}
+	
 	var arrayLen = [];
-	arrayLen.push(canvas.width - boarderLeftLen - boat.width, boarderLeftLen , canvas.height - boarderTopLen - boat.height);
+	arrayLen.push(canvas.width - boarderLeftLen - 200, boarderLeftLen , canvas.height - boarderTopLen - 200);
 	//Place the playerChar in the middle of canvas
 	playerChar.x = canvas.width / 2;
 	playerChar.y = canvas.height / 2;
-	//console.log(arrayLen);
 
 	//Place the pride somewhere on the screen randomly
 	pride.x = boarderTopLen + (Math.random() * (canvas.width - 150));
@@ -209,8 +205,7 @@ var update = function (modifier) {
 	playerChar.moveLeft = false;
 	playerChar.moveRight = false;
 	playerChar.moveUp = false;
-	playerChar.moveDown = false;
-	
+	playerChar.moveDown = false;	
 
 	if (38 in keysDown) { // Player holding up 
 		playerChar.y -= playerChar.speed * modifier; // make the object move fater or lower
@@ -272,8 +267,7 @@ var update = function (modifier) {
 		} else {
 			soundEfx.src = soundCaught;
 			soundEfx.play();
-		}
-		switchObjects = 1;
+		}	
 		reset();
 	}
 
@@ -317,8 +311,6 @@ var update = function (modifier) {
 		playerChar.srcY = 3 * playerChar.height;
 	}
 
-	//destroyer2.srcX = 0;
-	//destroyer2.srcX = 100;
 	// When playerChar and destroyer touch each other
 	redrawGame(playerChar, boat);
 	gameOver(playerChar, destroyer);
@@ -399,7 +391,6 @@ function gameOver (player, destroyer){
 		pridesCaught = 0;
 		soundEfx.src = soundFailed;
 		soundEfx.play();
-		switchObjects = 1;
 		reset();
 	}
 }
@@ -409,7 +400,6 @@ function redrawGame(player, boat){
 		keysDown = {};
 		switchObjects = switchObjects * (-1);
 		// switch images 
-
 		if(switchObjects === 1){
 			imagesSea();
 			setWHObjectSea();
@@ -417,8 +407,7 @@ function redrawGame(player, boat){
 		else{
 			imagesHouse ();
 			setWHObjectHouse ();
-		};
-		
+		};		
 		// update new x,y for playerChar
 		playerChar.x = pride.x + 20;
 		playerChar.y = pride.y + pride.height + 20;
