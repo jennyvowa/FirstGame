@@ -432,13 +432,13 @@ function moveObjects (object) {
 
 function gameOver (player, destroyer){
 	if ( isTouching(player, destroyer)) 
-	{		
+	{	
+		soundEfx.src = soundFailed;
+		soundEfx.play();	
 		alert("The mission was failed!");
 		keysDown = {};
 		pridesCaught = 0;
 		timeWon = 0;
-		soundEfx.src = soundFailed;
-		soundEfx.play();
 		reset();
 	}
 }
