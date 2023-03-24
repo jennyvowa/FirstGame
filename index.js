@@ -153,6 +153,9 @@ var pridesCaught = 0;
 var boarderTopLen = 32;
 var boarderLeftLen = 32;
 var buffer = 10;
+var shortestTime = 0;
+var startTime = 0;
+var timeWon = 0; 
 
 
 // Handle keyboard controls
@@ -171,6 +174,7 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a pride
 var reset = function () {
+	startTime = Date.now();
 	if(switchObjects === 1){
 		boat.width = 187;
 		boat.height = 156;
@@ -256,15 +260,33 @@ var update = function (modifier) {
 	if ( isTouching(playerChar, pride)) 
 	{
 		++pridesCaught;
+		console.log(pridesCaught);
+		timeWon += (Date.now() - startTime);
+		timeWon /=1000;
+		console.log(timeWon);
 		// insert play sounds where you want them to happen
 		if (pridesCaught === 3) {
 			// change sound effect and play it.
 			soundEfx.src = soundGameOver;
 			soundEfx.play();
-			alert("you won");
+			if(shortestTime === 0){
+				shortestTime = timeWon;
+				alert("you won! " + "New time record: " + shortestTime);
+				keysDown = {};
+			}
+			else if (timeWon <shortestTime) {
+				shortestTime = timeWon;
+				alert("you won!" +" New time record:  " + shortestTime);
+				keysDown = {};
+			}else{
+				alert("you won! " + "Shortest time: " + shortestTime);
+				keysDown = {};
+			}
 			keysDown = {};
 			pridesCaught = 0;
+			timeWon = 0;
 		} else {
+			keysDown = {};
 			soundEfx.src = soundCaught;
 			soundEfx.play();
 		}	
@@ -340,7 +362,7 @@ var render = function () {
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText("Rescue: " + pridesCaught, boarderTopLen, boarderLeftLen);
+	ctx.fillText("Score: " + pridesCaught, boarderTopLen, boarderLeftLen);
 	if (playerCharReady) {
 		// For animation 
 		ctx.drawImage(playerCharImage, playerChar.srcX, playerChar.srcY, playerChar.width, playerChar.height, playerChar.x, playerChar.y, playerChar.width, playerChar.height);
@@ -389,6 +411,7 @@ function gameOver (player, destroyer){
 		alert("The mission was failed!");
 		keysDown = {};
 		pridesCaught = 0;
+		timeWon = 0;
 		soundEfx.src = soundFailed;
 		soundEfx.play();
 		reset();
@@ -459,6 +482,7 @@ var main = function () {
 
 	//  Request to do this again ASAP , call the main method over and over again, so our players can move and be re-drawn
 	requestAnimationFrame(main);
+	startTime = Date.now();
 };
 
 /***********************    Let's play this game!   **************************/
