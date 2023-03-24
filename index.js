@@ -79,6 +79,14 @@ destroyer2Image.onload = function () {
 };
 destroyer2Image.src = "images/aspider_pre.png";
 
+// destroyer2 images -> plan to have it when the collision happen. What do you think?
+var destroyer3Ready = false;
+var destroyer3Image = new Image();
+destroyer3Image.onload = function () {
+	destroyer3Ready = true;
+};
+destroyer3Image.src = "images/monster.png";
+
 
 /*****************************   Main Loop of the game     *************************/
 // Game objects 
@@ -149,6 +157,13 @@ var destroyer2 = {
 	direction: 1
 };
 
+var destroyer3 = {
+	x: 0,
+	y: 0,
+	width: 50,
+	height: 50,
+};
+
 var pridesCaught = 0;
 var boarderTopLen = 32;
 var boarderLeftLen = 32;
@@ -190,16 +205,20 @@ var reset = function () {
 	playerChar.y = canvas.height / 2;
 
 	//Place the pride somewhere on the screen randomly
-	pride.x = boarderTopLen + (Math.random() * (canvas.width - 150));
+	pride.x = boarderTopLen + (Math.random() * (canvas.width - 200));
 	pride.y = boarderLeftLen + (Math.random() * (canvas.height - 148));
 	boat.x = arrayLen[Math.floor(Math.random() * 2)];
 	boat.y = arrayLen[Math.floor(1 + Math.random() * 2)];
 	destroyer.x = boarderLeftLen + (Math.random() * (canvas.width - 150));
 	destroyer.y = boarderTopLen + (Math.random() * (canvas.height - 148));
 	destroyer.direction = 1;
+
 	destroyer2.x = pride.x + 50;
 	destroyer2.y = pride.y + Math.random()*10 + 50;
 	destroyer2.direction = 1;
+
+	destroyer3.x = pride.x - 40;
+	destroyer3.y = 400;
 };
 
 // Update game objects
@@ -337,6 +356,8 @@ var update = function (modifier) {
 	redrawGame(playerChar, boat);
 	gameOver(playerChar, destroyer);
 	gameOver(playerChar, destroyer2);
+	gameOver(playerChar, destroyer3);
+
 
 };
 
@@ -377,6 +398,10 @@ var render = function () {
 		//ctx.drawImage(destroyer2Image, destroyer2.srcX, destroyer2.srcY, destroyer2.width, destroyer2.height, destroyer2.x, destroyer2.y, destroyer2.width, destroyer2.height);
 		ctx.drawImage(destroyer2Image, destroyer2.x, destroyer2.y);
 	}
+	if (destroyer3Ready) {
+		//ctx.drawImage(destroyer2Image, destroyer2.srcX, destroyer2.srcY, destroyer2.width, destroyer2.height, destroyer2.x, destroyer2.y, destroyer2.width, destroyer2.height);
+		ctx.drawImage(destroyer3Image, destroyer3.x, destroyer3.y);
+	}
 };
 
 // Helper functions
@@ -388,7 +413,7 @@ function isTouching (player, object) {
 };
 
 function moveObjects (object) {
-	object.x = object.x + (4 * object.direction);
+	object.x = object.x + (3 * object.direction);
 	if (object.x >= canvas.width - boarderLeftLen - object.width) { // go right
 		object.direction = Math.random() * (-2);
 	}
@@ -396,7 +421,7 @@ function moveObjects (object) {
 		object.direction = Math.random() * 2;
 	}
 
-	object.y = object.y + (4 * object.direction);
+	object.y = object.y + (3 * object.direction);
 	if (object.y >= canvas.height - boarderTopLen - object.height) {  // go top
 		object.direction = -1.5;
 	}
@@ -443,6 +468,8 @@ function imagesSea () {
 	boatImage.src = "images/boat4.png";
 	destroyerImage.src = "images/sea_demon4.png";
 	destroyer2Image.src = "images/aspider_pre.png";
+	destroyer3Image.src = "images/monster.png";
+
 };
 
 function imagesHouse () {
@@ -450,6 +477,7 @@ function imagesHouse () {
 	boatImage.src = "images/spacestation.png";
 	destroyerImage.src = "images/2ghost.png";
 	destroyer2Image.src = "images/2spider.png";
+	destroyer3Image.src = "images/explosion2.png";
 };
 
 function setWHObjectSea () {
@@ -459,6 +487,8 @@ function setWHObjectSea () {
 	destroyer.height = 80;
 	destroyer2.width = 49;
 	destroyer2.height = 41;
+	destroyer3.width = 50;
+	destroyer3.height = 50;
 };
 
 function setWHObjectHouse () {
@@ -468,6 +498,8 @@ function setWHObjectHouse () {
 	destroyer.height = 45;
 	destroyer2.width = 118;
 	destroyer2.height = 42;
+	destroyer3.width = 30;
+	destroyer3.height = 32;
 };
 
 
