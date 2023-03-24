@@ -217,7 +217,11 @@ var reset = function () {
 	destroyer2.y = pride.y + Math.random()*10 + 50;
 	destroyer2.direction = 1;
 
-	destroyer3.x = pride.x - 40;
+	if(pride.x - 100 < boarderLeftLen){
+		destroyer3.x = pride.x + 200;
+	}else{
+		destroyer3.x = pride.x - 100;
+	}	
 	destroyer3.y = 400;
 };
 
